@@ -5,7 +5,7 @@ from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR, LEGACY_SAFETY_MODE_CAR_ALT, ANGLE_CONTROL_CAR
+from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR, CAN_GEARS, LEGACY_SAFETY_MODE_CAR_ALT, ANGLE_CONTROL_CAR
 from opendbc.car.interfaces import CarControllerBase
 
 from cereal import car, messaging
@@ -728,6 +728,9 @@ class CarController(CarControllerBase):
                                                 torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
                                                 hud_control.leftLaneVisible, hud_control.rightLaneVisible,
                                                 left_lane_warning, right_lane_warning, 0, self.ldws_fix))
+
+      if self.CP.carFingerprint in CAN_GEARS["send_mdps12"]:  # send mdps12 to LKAS to prevent LKAS error
+        can_sends.append(hyundaican.create_mdps12(self.packer, self.frame, CS.mdps12))
 
       if CS.out.cruiseState.standstill:
         self.standstill_status = True
